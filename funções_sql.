@@ -1,0 +1,163 @@
+create database exercícios_fixação;
+use  exercícios_fixação;
+-- drop database  exercícios_fixação;
+
+CREATE TABLE nomes (
+    nome VARCHAR(50)
+);
+
+INSERT INTO nomes (nome) VALUES
+    ('Roberta'),
+    ('Roberto'),
+    ('Maria Clara'),
+    ('João');
+
+SELECT UPPER(nome) FROM nomes;
+
+SELECT nome, LENGTH(nome) AS tam_nome FROM nomes;
+
+SELECT
+    CASE
+        WHEN RIGHT(nome, 1) = 'o' THEN CONCAT('Sr. ', nome)
+        ELSE CONCAT('Sra. ', nome)
+    END AS nome_modificado
+FROM nomes;
+
+CREATE TABLE produtos (
+    produto VARCHAR(50),
+    preco DECIMAL(10, 2),
+    quantidade INT
+);
+
+INSERT INTO produtos (produto, preco, quantidade) VALUES
+    ('Produto_A', ROUND(9.99, 2), 10),
+    ('Produto_B', ROUND(59.90, 2), 50),
+    ('Produto_C', ROUND(67.98, 2), 85);
+
+SELECT produto, ABS(quantidade) AS quantidade_abs FROM produtos;
+
+SELECT AVG(preco) AS media_preco FROM produtos;
+
+create table eventos (
+    data_evento date
+);
+
+insert into eventos (data_evento) values
+    ('2006-10-10'),
+    ('2006-08-21'),
+    ('2007-03-11'),
+    ('2007-03-08');
+
+insert into eventos (data_evento)
+values (NOW());
+
+SELECT DATEDIFF('2007-03-11', '2006-08-21') AS dias_datas;
+
+SELECT DAYNAME(data_evento) AS dia_semana
+FROM eventos;
+
+SELECT
+    produto,
+    quantidade,
+    IF(quantidade > 0, 'Em estoque', 'Fora de estoque') AS estoque
+FROM produtos;
+
+SELECT
+    produto,
+    CASE
+        WHEN preco < 20 THEN 'Barato'
+        WHEN preco >= 20 AND preco <= 50 THEN 'Médio'
+        ELSE 'Caro'
+    END AS catpreco
+FROM produtos;
+
+DELIMITER //
+
+CREATE FUNCTION TOTAL_VALOR (PRECO DECIMAL(10,2), QUANTIDADE INT) 
+RETURNS DECIMAL(10,2) 
+DETERMINISTIC
+BEGIN 
+    DECLARE total_valor DECIMAL(10,2);   
+    SET total_valor = PRECO * QUANTIDADE;   
+    RETURN total_valor; 
+END;
+
+// DELIMITER ;
+
+SELECT produto, TOTAL_VALOR(preco, quantidade) AS valortotal FROM produtos;
+
+SELECT COUNT(*) AS total_de_produtos FROM produtos;
+
+SELECT produto, preco FROM produtos WHERE preco = (SELECT MAX(preco) FROM produtos);
+
+SELECT produto, preco FROM produtos WHERE preco = (SELECT MIN(preco) FROM produtos);
+
+SELECT SUM(IF(quantidade > 0, preco * quantidade, 0)) AS valor_estoque FROM produtos;
+
+DELIMITER //
+
+CREATE FUNCTION Fatorial(n INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE result INT DEFAULT 1;
+    DECLARE m INT DEFAULT 1;
+    
+    WHILE m <= n DO
+        SET result = result * m;
+        SET m = m + 1;
+    END WHILE;
+    
+    RETURN result;
+END;
+
+// DELIMITER ;
+
+SELECT Fatorial(7);
+SELECT Fatorial(2);
+
+DELIMITER //
+
+CREATE FUNCTION Exponencial(base DECIMAL, expoente INT)
+RETURNS DECIMAL
+DETERMINISTIC
+BEGIN
+    DECLARE resultado DECIMAL DEFAULT 1;
+    DECLARE num INT DEFAULT 1;
+    
+    WHILE num <= expoente DO
+        SET resultado = resultado * base;
+        SET num = num + 1;
+    END WHILE;
+    
+    RETURN resultado;
+END;
+
+// DELIMITER ;
+
+SELECT Exponencial(4,8);
+SELECT Exponencial(10,7);
+
+
+DELIMITER //
+CREATE FUNCTION Palindromo(palavra VARCHAR(255)) RETURNS INT
+DETERMINISTIC
+BEGIN
+  DECLARE tamanho INT;
+  DECLARE pa INT;
+  
+  SET tamanho = LENGTH(palavra);
+  SET pa = 1;
+  
+  WHILE pa <= tamanho/2 DO
+    IF SUBSTRING(palavra, pa, 1) != SUBSTRING(palavra, tamanho - pa + 1, 1) THEN
+      RETURN 0;
+    END IF;
+    
+    SET pa = pa + 1;
+  END WHILE;
+  
+  RETURN 1;
+END;
+//
+DELIMITER ;
